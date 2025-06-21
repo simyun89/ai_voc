@@ -284,17 +284,16 @@ gpt_anal = f"<pre>{gpt_anal_text}</pre>"
 
 # [6] body_html에 gpt_anal 삽입
 body_html = f"""
-<h2>1. 리뷰/평점 요약표</h2>
+<h2>📊 1. 리뷰/평점 요약표</h2>
 {summary_html}
 <br>
-<h2>2. 카테고리별 부정 리뷰 분포</h2>
+<h2>📁 2. 카테고리별 부정 리뷰 분포</h2>
 {category_html}
 <br>
-<h2>3. 주요 인사이트</h2>
+<h2>💡 3. 주요 인사이트</h2>
 {gpt_anal}
 <br>
-<h2>[첨부] 아래 첨부파일(df_all.csv) 다운로드</h2>
-<br>
+<h2>📝 [Raw Data] 전체 리뷰 데이터 다운로드</h2>
 """
 
 # [7] Confluence 페이지 생성
