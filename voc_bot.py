@@ -254,19 +254,45 @@ summary_html = summary_df.to_html(index=False, border=1)
 category_html = category_table.to_html(index=False, border=1)
 
 # [5] 주요 인사이트(gpt_anal) 생성: 최근 20개 리뷰만 요약 예시 (실무에서는 더 많은 row로 확장 가능)
-review_texts = "\n".join(df_filtered.sort_values('작성일', ascending=False)['리뷰 텍스트'])
+ja_texts = "\n".join(
+    df_filtered[df_filtered['구분'] == '자사'].sort_values('작성일', ascending=False)['리뷰 텍스트']
+)
+comp_texts = "\n".join(
+    df_filtered[df_filtered['구분'] == '경쟁사'].sort_values('작성일', ascending=False)['리뷰 텍스트']
+)
 
-gpt_prompt = f"""아래는 앱 리뷰 데이터 일부입니다.
 
-{review_texts}
+gpt_prompt = f"""아래는 앱 부정 리뷰 데이터 입니다.
 
-이 리뷰 데이터를 참고해 아래 양식에 맞게 요약해주세요.
+[자사 부정 리뷰]
+{ja_texts}
 
-- 주요 긍정 포인트 (3줄 이내)
-- 주요 개선 필요점 (3줄 이내)
-- 인사이트/트렌드 (3줄 이내)
+[경쟁사 부정 리뷰]
+{comp_texts}
 
-한글로 간단명료하게 작성해 주세요.
+리뷰 데이터를 참고해 아래 양식에 맞게 요약해 주세요.
+
+[자사 부정 이슈 TOP3]
+1. 예시
+2. 예시
+3. 예시
+<br>
+[경쟁사 부정 이슈 TOP3]
+1. 예시
+2. 예시
+3. 예시
+<br>
+[전체 인사이트/트렌드]
+- 예시
+- 예시
+- 예시
+
+공통규칙:
+- let's think step by step and work through this carefully
+- 부정 이슈 TOP3 : "자사 부정 리뷰", "경쟁사 부정 리뷰" 각 리뷰를 읽고 자사,경쟁사별 가장 많이 언급된 순서로 top3를 알려줍니다. 이는 어떤 이슈가 가장 많은지 확인하기 위함으로 정확해야 합니다.
+- 부정 이슈는 구체적인 문제 유형(예: 충전 오류, 카드 등록 실패, 앱 튕김 등) 위주로 정리해 주세요.
+- 전체적인 인사이트/트렌드: 반복적으로 언급되는 이슈, 특정 서비스/기능에 집중된 불만 등 데이터에서 확인되는 특징을 3줄로 요약해 주세요.
+
 """
 
 # GPT API 호출
