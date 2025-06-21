@@ -302,7 +302,7 @@ confluence_domain = 'myezl.atlassian.net'
 
 
 headers = {
-    'Authorization': 'Basic ' + base64.b64encode(f'{api_user}:{api_token}'.encode()).decode(),
+    'Authorization': 'Basic ' + base64.b64encode(f'{confluence_api_user}:{confluence_api_token}'.encode()).decode(),
     'Content-Type': 'application/json'
 }
 base_url = f'https://{confluence_domain}/wiki/rest/api/content/'
