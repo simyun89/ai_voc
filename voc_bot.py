@@ -328,7 +328,7 @@ print("페이지 생성 완료:", new_page_id)
 time.sleep(2)
 attach_url = f'https://{confluence_domain}/wiki/rest/api/content/{new_page_id}/child/attachment'
 attach_headers = {
-    'Authorization': 'Basic ' + base64.b64encode(f'{api_user}:{api_token}'.encode()).decode(),
+    'Authorization': 'Basic ' + base64.b64encode(f'{confluence_api_user}:{confluence_api_token}'.encode()).decode(),
     'X-Atlassian-Token': 'no-check'
 }
 with open(csv_file_path, 'rb') as f:
