@@ -1,0 +1,5 @@
+pandas
+requests
+openai
+google-play-scraper
+app-store-web-scraper
