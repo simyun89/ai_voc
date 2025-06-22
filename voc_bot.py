@@ -325,7 +325,7 @@ body_html = f"""
 {category_html}
 <br>
 <h2>💡 3. 주요 인사이트</h2>
-{gpt_anal}
+<pre>{gpt_anal}</pre>
 <br>
 <h2>📝 [Raw Data] 전체 리뷰 데이터 다운로드</h2>
 """
