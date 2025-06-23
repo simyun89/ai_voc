@@ -428,12 +428,8 @@ print(attach_response.text)
 assert attach_response.status_code in [200, 201], "첨부파일 업로드 실패: " + attach_response.text
 print("첨부파일 업로드 완료")
 
-# 첨부파일 업로드 후 실제 다운로드 URL 추출
-attach_json = attach_response.json()
-download_url = f"https://{confluence_domain}{attach_json['results'][0]['_links']['download']}"
-print("실제 다운로드 URL:", download_url)
-
 # [9] 본문에 다운로드 링크 PATCH
+download_url = f"https://{confluence_domain}/wiki/download/attachments/{new_page_id}/df_all.csv"
 patch_url = f'https://{confluence_domain}/wiki/rest/api/content/{new_page_id}'
 patch_headers = headers
 patch_data = {
@@ -449,4 +445,3 @@ patch_data = {
 }
 patch_response = requests.put(patch_url, headers=patch_headers, json=patch_data)
 print("본문에 다운로드 링크 추가 완료:", patch_response.status_code)
-
