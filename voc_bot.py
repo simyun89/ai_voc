@@ -13,12 +13,12 @@ import json
 openai_api_key = os.environ.get("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=openai_api_key)
 end_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+start_date = (datetime.now() - timedelta(days=8)).strftime('%Y-%m-%d')
 confluence_api_token = os.environ.get("CONFLUENCE_API_TOKEN")
 confluence_api_user = os.environ.get("CONFLUENCE_API_USER")
 space_key = 'CSO'
 parent_page_id = '619544652'
-title = "자동 분석 리포트 샘플_" + datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+title = "주간 앱 리뷰 분석 리포트_" + datetime.now().strftime("%Y-%m-%d")
 
 ## 이즐충전소 aos
 google_app_id = 'com.locam.cashbeecharge'
@@ -363,7 +363,11 @@ gpt_anal = f"<pre>{gpt_anal_text}</pre>"
 # [6] body_html에 gpt_anal 삽입
 body_html = f"""
 <br>
-
+<h2>참고 사항</h2>
+<ul>
+  <li>본 보고서는 매주 월요일 오전 7시에 자동 발송됩니다.</li>
+  <li>지난주(월~일) 수집된 앱 리뷰를 기반으로 분석 및 요약한 자료입니다. 수정이 필요할 경우 담당자에게 문의해 주세요.</li>
+</ul>
 <h2>📊 1. 리뷰/평점 요약표</h2>
 {summary_html}
 <br>
@@ -376,7 +380,7 @@ body_html = f"""
 <h2>💡 4. 주요 인사이트</h2>
 <pre>{gpt_anal}</pre>
 <br>
-<h2>📝 [Raw Data] 전체 리뷰 데이터 다운로드</h2>
+<h2>📝 [Raw Data] 지난주 리뷰 데이터 다운로드</h2>
 """
 
 # [7] Confluence 페이지 생성
