@@ -382,7 +382,7 @@ body_html = f"""
 <h2>💡 4. 주요 인사이트</h2>
 {gpt_anal}
 <br>
-<h2>📝 [Raw Data] 지난주 리뷰 데이터 다운로드</h2>
+<h2>📝 [Raw Data] 리뷰 데이터 다운로드</h2>
 """
 
 # [7] Confluence 페이지 생성
