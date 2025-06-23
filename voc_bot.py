@@ -308,7 +308,7 @@ os_cat_html = os_cat_df.to_html(index=False, border=1)
 summary_html = summary_df.to_html(index=False, border=1)
 category_html = category_table.to_html(index=False, border=1)
 
-# [5] 주요 인사이트(gpt_anal) 생성: 최근 20개 리뷰만 요약 예시 (실무에서는 더 많은 row로 확장 가능)
+# [5] 주요 인사이트(gpt_anal) 생성
 ja_texts = "\n".join(
     df_filtered[df_filtered['구분'] == '자사'].sort_values('작성일', ascending=False)['리뷰 텍스트']
 )
