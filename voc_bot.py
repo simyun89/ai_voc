@@ -379,14 +379,13 @@ body_html = f"""
 {os_cat_html}
 <br>
 <h2>💡 4. 주요 인사이트</h2>
-<pre>{gpt_anal}</pre>
+{gpt_anal}
 <br>
 <h2>📝 [Raw Data] 지난주 리뷰 데이터 다운로드</h2>
 """
 
 # [7] Confluence 페이지 생성
 confluence_domain = 'myezl.atlassian.net'
-
 
 headers = {
     'Authorization': 'Basic ' + base64.b64encode(f'{confluence_api_user}:{confluence_api_token}'.encode()).decode(),
@@ -411,37 +410,45 @@ assert response.status_code in [200, 201], "페이지 생성 실패: " + respons
 new_page_id = response.json()['id']
 print("페이지 생성 완료:", new_page_id)
 
-# [8] 첨부파일 업로드 (sleep 2초 후)
+# [8] 첨부파일 업로드
 time.sleep(2)
-attach_url = f'https://{confluence_domain}/wiki/rest/api/content/{new_page_id}/child/attachment'
+attach_url = f"https://{confluence_domain}/wiki/rest/api/content/{new_page_id}/child/attachment"
 attach_headers = {
-    'Authorization': 'Basic ' + base64.b64encode(f'{confluence_api_user}:{confluence_api_token}'.encode()).decode(),
-    'X-Atlassian-Token': 'no-check'
+    "Authorization": "Basic " + base64.b64encode(f"{confluence_api_user}:{confluence_api_token}".encode()).decode(),
+    "X-Atlassian-Token": "no-check",
 }
-with open(csv_file_path, 'rb') as f:
-    files = {'file': (os.path.basename(csv_file_path), f, 'text/csv')}
-    attach_response = requests.post(attach_url, headers=attach_headers, files=files)
+with open(csv_file_path, "rb") as f:
+    files = {"file": (os.path.basename(csv_file_path), f, "text/csv")}
+    attach_resp = requests.post(attach_url, headers=attach_headers, files=files)
+attach_resp.raise_for_status()
 
-print("API 응답:", attach_response.status_code)
-print(attach_response.text)
+# 업로드된 실제 파일명·download 링크 추출
+result_info   = attach_resp.json()["results"][0]
+filename      = result_info["title"]                       # df_all.csv 또는 df_all.csv (1)
+download_path = result_info["_links"]["download"]          # /download/attachments/...
 
-assert attach_response.status_code in [200, 201], "첨부파일 업로드 실패: " + attach_response.text
-print("첨부파일 업로드 완료")
+print("첨부파일 업로드 완료:", filename)
 
-# [9] 본문에 다운로드 링크 PATCH
-download_url = f"https://{confluence_domain}/wiki/download/attachments/{new_page_id}/df_all.csv"
-patch_url = f'https://{confluence_domain}/wiki/rest/api/content/{new_page_id}'
-patch_headers = headers
+# [9] 본문에 첨부파일 링크 PATCH (ri:attachment 매크로)
+# 현재 페이지 버전 조회
+ver_resp = requests.get(f"{base_url}{new_page_id}?expand=version", headers=headers)
+cur_ver  = ver_resp.json()["version"]["number"]
+
+attachment_macro = f'<p><ac:link><ri:attachment ri:filename="{filename}" /></ac:link></p>'
+new_body_html    = body_html + attachment_macro
+
 patch_data = {
-    "version": {"number": 2},
-    "title": title,
+    "version": {"number": cur_ver + 1, "minorEdit": True},
     "type": "page",
+    "title": title,
     "body": {
         "storage": {
-            "value": body_html + f'<br><a href="{download_url}">df_all.csv 다운로드</a><br>',
+            "value": new_body_html,
             "representation": "storage"
         }
     }
 }
-patch_response = requests.put(patch_url, headers=patch_headers, json=patch_data)
-print("본문에 다운로드 링크 추가 완료:", patch_response.status_code)
+
+patch_resp = requests.put(f"{base_url}{new_page_id}", headers=headers, json=patch_data)
+patch_resp.raise_for_status()
+print("본문에 첨부파일 링크 추가 완료:", patch_resp.status_code)
