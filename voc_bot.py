@@ -65,7 +65,7 @@ for r in result:
 df_google_m = pd.DataFrame(data_google, columns=['구분', '앱명칭', 'os', '작성일', '버전', '리뷰 제목', '리뷰 내용', '평점'])
 
 ## 이즐충전소 ios
-app = AppStoreEntry(app_id=1470361790, country="kr")
+app = AppStoreEntry(app_id=1519907149, country="kr")
 reviews = list(app.reviews(limit=500))
 data_apple = []
 for r in reviews:
@@ -105,7 +105,7 @@ for r in result:
 df_google_t = pd.DataFrame(data_google, columns=['구분', '앱명칭', 'os', '작성일', '버전', '리뷰 제목', '리뷰 내용', '평점'])
 
 ## 모바일티머니 ios
-app = AppStoreEntry(app_id=1519907149, country="kr")
+app = AppStoreEntry(app_id=1470361790, country="kr")
 reviews = list(app.reviews(limit=500))
 data_apple = []
 for r in reviews:
