@@ -249,6 +249,61 @@ category_order = [
 category_table['카테고리'] = pd.Categorical(category_table['카테고리'], categories=category_order, ordered=True)
 category_table = category_table.sort_values('카테고리')
 
+
+# 긍정/부정 구분 포함 전체 카테고리 집계
+rows = []
+
+for reaction in ['긍정', '부정']:
+    if reaction == '긍정':
+        # 긍정은 카테고리 없이 한줄
+        for os_name in ['android', 'ios']:
+            cnt = len(df_all[(df_all['구분'] == '자사') & (df_all['os'] == os_name) & (df_all['반응'] == reaction)])
+            rows.append([reaction, '', cnt if os_name == 'android' else '', '' if os_name == 'android' else cnt])
+        continue
+    # 부정: 카테고리별 집계
+    for cat in category_order:
+        row = [reaction, cat]
+        for os_name in ['android', 'ios']:
+            mask = (
+                (df_all['구분'] == '자사') &
+                (df_all['os'] == os_name) &
+                (df_all['반응'] == reaction) &
+                (df_all['카테고리'] == cat)
+            )
+            cnt = df_all[mask].shape[0]
+            row.append(cnt)
+        rows.append(row)
+
+# 데이터프레임 생성
+os_cat_df = pd.DataFrame(
+    rows,
+    columns=[
+        '반응', '카테고리',
+        '리뷰 건수(android)', '리뷰 건수(ios)'
+    ]
+)
+
+# OS별 부정 합계 계산
+for os_name in ['android', 'ios']:
+    total_neg = os_cat_df.loc[
+        (os_cat_df['반응'] == '부정'), f'리뷰 건수({os_name})'
+    ].sum()
+    os_cat_df[f'비중 ({os_name})'] = os_cat_df.apply(
+        lambda row: round((row[f'리뷰 건수({os_name})'] / total_neg * 100), 2) if row['반응'] == '부정' and total_neg > 0 else '',
+        axis=1
+    )
+
+# 칼럼 순서 재배치
+os_cat_df = os_cat_df[
+    ['반응', '카테고리',
+     '리뷰 건수(android)', '비중 (android)',
+     '리뷰 건수(ios)', '비중 (ios)']
+]
+
+# HTML 변환
+os_cat_html = os_cat_df.to_html(index=False, border=1)
+
+
 # [4] HTML 변환 (컨플루언스 본문)
 summary_html = summary_df.to_html(index=False, border=1)
 category_html = category_table.to_html(index=False, border=1)
@@ -272,35 +327,24 @@ gpt_prompt = f"""아래는 앱 부정 리뷰 데이터 입니다.
 
 리뷰 데이터를 참고해 아래 양식에 맞게 요약해 주세요.
 
-<h3>[자사 부정 이슈 TOP3]</h3>
-<ul>
-<li>작성해주세요</li>
-<li>작성해주세요</li>
-<li>작성해주세요</li>
-</ul>
+[자사 부정 이슈]
+- 작성해주세요
+- 작성해주세요
+- 작성해주세요 
 
-<h3>[경쟁사 부정 이슈 TOP3]</h3>
-<ul>
-<li>작성해주세요</li>
-<li>작성해주세요</li>
-<li>작성해주세요</li>
-</ul>
+[경쟁사 부정 이슈]
+- 작성해주세요 
+- 작성해주세요
+- 작성해주세요
 
-<h3>[전체 인사이트/트렌드]</h3>
-<ul>
-<li>작성해주세요</li>
-<li>작성해주세요</li>
-<li>작성해주세요</li>
-</ul>
 
 공통규칙:
 - let's think step by step and work through this carefully
-- 부정 이슈 TOP3 : "자사 부정 리뷰", "경쟁사 부정 리뷰" 각 리뷰를 읽고 자사,경쟁사별 가장 많이 언급된 순서로 top3를 알려줍니다. 이는 어떤 이슈가 가장 많은지 확인하기 위함으로 정확해야 합니다.
-- 부정 이슈는 구체적인 문제 유형(예: 충전 오류, 카드 등록 실패, 앱 튕김 등) 위주로 정리해 주세요.
-- 전체적인 인사이트/트렌드: 반복적으로 언급되는 이슈, 특정 서비스/기능에 집중된 불만 등 데이터에서 확인되는 특징을 3줄로 요약해 주세요.
-- 결과물은 컨플루언스 API에 body_html로 전달됩니다.
-- 아래 html 양식에서 <li>작성해주세요</li> 부분만 실제 분석 결과로 채워주고, 나머지 html 태그와 구조(제목, 줄바꿈 등)는 절대 수정하거나 변형하지 마세요.
-- 반드시 지정해준 html 양식을 한 글자도 빠짐없이 그대로 유지해주세요.
+- 자사/타사 부정 이슈 : "자사 부정 리뷰", "경쟁사 부정 리뷰" 각 리뷰를 읽고 자사,경쟁사별 가장 많이 언급된 문제를 구체적으로 정리합니다 이는 어떤 이슈가 가장 많은지 확인하기 위함으로 정확해야 합니다.
+- 부정 이슈는 구체적인 문제 유형(예: 충전 오류, 카드 등록 실패, 앱 튕김 등) 위주로 작성해 주세요.
+- 어떤 부정적인 경험을 통해 고객이 리뷰를 남기게까지 되는지, 어떤부분이 치명적 이였는지 파악이 되었으면 합니다.
+- 각 항목별 "작성해주세요"는 3개이지만 최소 3줄만 만족하면됩니다, 최대 6줄까지 허용합니다
+- 결과물은 컨플루언스 API를 통해 body_html로 전달되며 지정해준 제목,줄바꿈은 변경하지 말아주세요
 """
 
 # GPT API 호출
@@ -318,13 +362,18 @@ gpt_anal = f"<pre>{gpt_anal_text}</pre>"
 
 # [6] body_html에 gpt_anal 삽입
 body_html = f"""
+<br>
+
 <h2>📊 1. 리뷰/평점 요약표</h2>
 {summary_html}
 <br>
-<h2>📁 2. 카테고리별 부정 리뷰 분포</h2>
+<h2>📁 2. 부정 리뷰 카테고리별 분포</h2>
 {category_html}
 <br>
-<h2>💡 3. 주요 인사이트</h2>
+<h2>🧩 3. OS별 부정 리뷰/평점 분포</h2>
+{os_cat_html}
+<br>
+<h2>💡 4. 주요 인사이트</h2>
 <pre>{gpt_anal}</pre>
 <br>
 <h2>📝 [Raw Data] 전체 리뷰 데이터 다운로드</h2>
