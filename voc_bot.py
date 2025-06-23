@@ -13,7 +13,7 @@ import json
 openai_api_key = os.environ.get("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=openai_api_key)
 end_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-start_date = (datetime.now() - timedelta(days=8)).strftime('%Y-%m-%d')
+start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
 confluence_api_token = os.environ.get("CONFLUENCE_API_TOKEN")
 confluence_api_user = os.environ.get("CONFLUENCE_API_USER")
 space_key = 'CSO'
