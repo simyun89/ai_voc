@@ -363,11 +363,12 @@ gpt_anal = f"<pre>{gpt_anal_text}</pre>"
 # [6] body_html에 gpt_anal 삽입
 body_html = f"""
 <br>
-<h2>참고 사항</h2>
+<h2>📝 참고 사항</h2>
 <ul>
   <li>본 보고서는 매주 월요일 오전 7시에 자동 발송됩니다.</li>
   <li>지난주(월~일) 수집된 앱 리뷰를 기반으로 분석 및 요약한 자료입니다. 수정이 필요할 경우 담당자에게 문의해 주세요.</li>
 </ul>
+<br>
 <h2>📊 1. 리뷰/평점 요약표</h2>
 {summary_html}
 <br>
