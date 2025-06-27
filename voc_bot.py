@@ -358,7 +358,22 @@ response = client.chat.completions.create(
     temperature=0.5,
 )
 gpt_anal_text = response.choices[0].message.content.strip()
-gpt_anal = f"<pre>{gpt_anal_text}</pre>"
+
+# 주요 인사이트 텍스트 → 표 변환 함수
+def insight_to_table(gpt_anal_text):
+    data = []
+    for label in ['자사', '경쟁사']:
+        pattern = rf"\[{label} 부정 이슈\]([\s\S]+?)(?=\n\[|$)"
+        match = re.search(pattern, gpt_anal_text)
+        if match:
+            issues = [line.strip('- ').strip() for line in match.group(1).strip().split('\n') if line.strip()]
+            for issue in issues:
+                data.append({'구분': label, '이슈': issue})
+    return pd.DataFrame(data)
+
+# 변환 및 HTML 테이블 생성
+insight_df = insight_to_table(gpt_anal_text)
+insight_html = insight_df.to_html(index=False, border=1)
 
 # [6] body_html에 gpt_anal 삽입
 body_html = f"""
@@ -380,7 +395,7 @@ body_html = f"""
 {os_cat_html}
 <br>
 <h2>💡 4. 주요 인사이트</h2>
-{gpt_anal}
+{insight_html}
 <br>
 <h2>📝 [Raw Data] 리뷰 데이터 다운로드</h2>
 """
