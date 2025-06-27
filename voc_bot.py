@@ -8,6 +8,7 @@ import base64
 import requests
 import os
 import json
+import re
 
 #변수
 openai_api_key = os.environ.get("OPENAI_API_KEY")
